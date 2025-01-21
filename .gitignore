@@ -1,0 +1,10 @@
+*~
+.DS_Store
+Thumbs.db
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+venv/
+Task-Management-API/
