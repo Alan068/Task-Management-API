@@ -25,7 +25,7 @@ def response(success: bool, message: str, data=None):
 
 
 @app.post("/tasks/")
-def create_task(task: Task):  # Input to the API. Pass this info with the POST request to create a new task.
+def create_task(task: Task):  # Input to the API. Pass this info with the POST request to create a new task. 34
     task.id = uuid4()
     tasks.append(task)
     return response(True, "Task created successfully", task.model_dump())
