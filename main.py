@@ -1,7 +1,11 @@
 from fastapi import FastAPI, HTTPException
+
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder  # Converts Pydantic models and other non-serializable types into JSON-friendly formats.
+
 from pydantic import BaseModel
 from typing import List, Optional
-from uuid import UUID, uuid4  # Unique Identifier
+from uuid import UUID, uuid4  # Generates Unique identifier ID, 128bits
 
 # Created an instance of FastAPI
 app = FastAPI()
@@ -18,12 +22,20 @@ tasks = []  # In-memory database kind. When server turns off, all data is cleare
 
 
 # function to return responses
-def response(success: bool, message: str, data=None):
-    return {
-        "success": success,
-        "message": message,
-        "data": data if data is not None else []
-    }
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
+
+# Updated function to return JSON with correct status codes
+def response(success: bool, message: str, data=None, status_code: int = 200):
+    return JSONResponse(
+        content={
+            "success": success,
+            "message": message,
+            "data": jsonable_encoder(data) if data is not None else []
+        },
+        status_code=status_code
+    )
+
 
 
 @app.post("/tasks/")
@@ -44,7 +56,8 @@ def read_task(task_id: UUID):
     for task in tasks:
         if task.id == task_id:
             return response(True, "Task retrieved successfully", task)
-    return response(False, "Task not found")
+
+    raise HTTPException(status_code=404, detail="Task not found")
 
 
 @app.put("/tasks/{task_id}")
@@ -55,7 +68,7 @@ def update_task(task_id: UUID, task_update: Task):
             tasks[idx] = updated_task
             return response(True, "Task updated successfully", updated_task)
 
-    return response(False, "Task not found")
+    raise HTTPException(status_code=404, detail="Task not found")
 
 
 @app.delete("/tasks/{task_id}")
@@ -65,7 +78,7 @@ def delete_task(task_id: UUID):
             deleted_task = tasks.pop(idx)
             return response(True, "Task deleted successfully", deleted_task)
 
-    return response(False, "Task not found")
+    raise HTTPException(status_code=404, detail="Task not found")
 
 
 # To check if this Python file is running and not some other
